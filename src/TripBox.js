@@ -13,12 +13,14 @@ const TripBox = (props) => {
   // eslint-disable-next-line
   const [tourClass, setTourClass] = useState(props.buttonClass)
   const [tripsBooked, setTripsBooked] = useState(0);
+  // const [counter, setCounter] = useState(0);
 
 
   useEffect(() => {
 
     //making the call to retrieve preview photos from API
     axios({
+      // url: `https://proxy-ugwolsldnq-uc.a.run.app/https://images-api.nasa.gov/asset/${props.tripInfo.imgCode}`,
       url: `https://images-api.nasa.gov/asset/${props.tripInfo.imgCode}`,
       method: "GET",
       dataResponse: "json"
@@ -36,31 +38,35 @@ const TripBox = (props) => {
   useEffect(() =>{
     const database = getDatabase(app);
 		const dbRef = ref(database);
-
+    
     get(dbRef)
     .then( (snapshot) => {
       // check if there's a database
       if(snapshot.exists()){
-        let counter = 0;
+        // If the database exists create a temporary counter and set it to 0
+        let tripCounterTemp = 0;
+        // run through each object in the database, and geerate a reference to every object
         for (const item in snapshot.val()) {
           const dbRefChild = ref(database, `/${item}`);
+          // get the contents of every object, and then check if the location of that object matches the tripID. If that is true, add 1 to the temporary counter 
           get(dbRefChild)
           .then((snapshotChild) =>{
-            console.log(snapshotChild.val())
+            const destination = snapshotChild.val().where;
+            
+            if (destination === props.tripInfo.destName) {
+              tripCounterTemp = tripCounterTemp + 1;
+            }
+            // set the value of of tripsBooked to the current value of the temporary counter
+            setTripsBooked(tripCounterTemp)
           })
-          // console.log(snapshot.val());
-        }
-
-        // console.log(snapshot.val()[0]);
-        
-      } else {
-        
-      }
+        }     
+      } // end of if snapshot
     }).catch((error) => {
+      // if the database is empty or the connection is failing, alert the
       alert("No data available. Try reloading the page, or come back tomorrow because too many people are using this supper super fun app")
       console.log(error)
     })
-  },[])
+  },[props.tripInfo.destName])
 
 
   return (
