@@ -50,6 +50,7 @@ const TripBox = (props) => {
           const dbRefChild = ref(database, `/${item}`);
           // get the contents of every object, and then check if the location of that object matches the tripID. If that is true, add 1 to the temporary counter 
           get(dbRefChild)
+          // eslint-disable-next-line
           .then((snapshotChild) =>{
             const destination = snapshotChild.val().where;
             
